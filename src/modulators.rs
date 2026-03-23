@@ -18,10 +18,10 @@ pub struct NeuroModulators {
 impl Default for NeuroModulators {
     fn default() -> Self {
         Self {
-            dopamine: 0.5,
-            cortisol: 0.3,
-            acetylcholine: 0.6,
-            tempo: 1.0,
+            dopamine: 0.0,
+            cortisol: 0.0,
+            acetylcholine: 0.0,
+            tempo: 0.0,
             mining_dopamine: 0.0,   // NEW
         }
     }
