@@ -1,0 +1,28 @@
+[package]
+name = "neuromod"
+version = "0.2.1"
+edition = "2021"
+authors = ["Raul Mc <raulmc@example.com>"]
+license = "GPL-3.0-or-later"
+description = "Reward-modulated spiking neural networks (LIF + Izhikevich + STDP + dopamine/cortisol/acetylcholine) for Spikenaut HFT and FPGA deployment"
+repository = "https://github.com/rmems/neuromod"
+keywords = ["snn", "neuromorphic", "hft", "spiking", "fpga"]
+categories = ["science", "algorithms", "hardware-support"]
+
+[lib]
+name = "neuromod"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+
+[dev-dependencies]
+criterion = "0.5"
+
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
