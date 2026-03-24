@@ -105,7 +105,7 @@ impl NeuroModulators {
 
     /// Check if system is in reward state
     pub fn is_rewarded(&self) -> bool {
-        self.dopamine > 0.5
+        self.dopamine >= 0.5
     }
 
     /// Check if system is focused

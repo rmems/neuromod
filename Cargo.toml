@@ -1,10 +1,10 @@
 [package]
 name = "neuromod"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
-authors = ["Raul Mc <raulmc@example.com>"]
 license = "GPL-3.0-or-later"
 description = "Reward-modulated spiking neural networks (LIF + Izhikevich + STDP + dopamine/cortisol/acetylcholine) for Spikenaut HFT and FPGA deployment"
+exclude = ["docs/"]
 repository = "https://github.com/rmems/neuromod"
 keywords = ["snn", "neuromorphic", "hft", "spiking", "fpga"]
 categories = ["science", "algorithms", "hardware-support"]

@@ -9,6 +9,39 @@ use super::modulators::NeuroModulators;
 /// L1 synaptic weight budget per neuron (total weight sum target).
 const WEIGHT_BUDGET: f32 = 2.0;
 
+/// Aggregated bear/bull decision from the 7 channel pairs (N0–N13).
+///
+/// Each channel pair has one bear neuron (even index, conservative threshold)
+/// and one bull neuron (odd index, sensitive threshold). This struct summarises
+/// what the network "thinks" about the current input — useful for downstream
+/// trading or control logic without inspecting raw spike indices.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct BearBullSignal {
+    /// Number of bear neurons that fired this step (0–7)
+    pub bear_count: u8,
+    /// Number of bull neurons that fired this step (0–7)
+    pub bull_count: u8,
+    /// Number of Izhikevich adaptive neurons that fired (0–5)
+    pub iz_count: u8,
+}
+
+impl BearBullSignal {
+    /// Net sentiment: positive = bullish, negative = bearish, zero = neutral.
+    pub fn net(&self) -> i8 {
+        self.bull_count as i8 - self.bear_count as i8
+    }
+
+    /// True when bulls dominate and at least one Izhikevich burst confirms.
+    pub fn is_confirmed_bull(&self) -> bool {
+        self.bull_count > self.bear_count && self.iz_count > 0
+    }
+
+    /// True when bears dominate and at least one Izhikevich burst confirms.
+    pub fn is_confirmed_bear(&self) -> bool {
+        self.bear_count > self.bull_count && self.iz_count > 0
+    }
+}
+
 /// Main spiking neural network engine
 #[derive(Default, Serialize, Deserialize)]
 pub struct SpikingNetwork {
@@ -195,7 +228,41 @@ impl SpikingNetwork {
             }
         }
 
+        // Step Izhikevich adaptive bank.
+        // Drive with mean LIF activity modulated by dopamine, so the adaptive
+        // bank reflects the overall network excitement level.
+        let lif_mean = if !self.neurons.is_empty() {
+            let sum: f32 = self.neurons.iter().map(|n| n.membrane_potential).sum();
+            sum / self.neurons.len() as f32
+        } else {
+            0.0
+        };
+        let iz_drive = (lif_mean * 20.0 + self.modulators.dopamine * 5.0)
+            .clamp(0.0, 15.0);
+        for iz in &mut self.iz_neurons {
+            iz.step(iz_drive);
+        }
+
         spike_ids
+    }
+
+    /// Returns aggregated bear/bull signal for the current step.
+    ///
+    /// Call immediately after `step()` to get directional sentiment without
+    /// inspecting raw spike index vectors.
+    pub fn bear_bull_signal(&self) -> BearBullSignal {
+        let mut bear_count = 0u8;
+        let mut bull_count = 0u8;
+        for pair in 0..7 {
+            if self.neurons[pair * 2].last_spike     { bear_count += 1; }
+            if self.neurons[pair * 2 + 1].last_spike { bull_count += 1; }
+        }
+        // Count Izhikevich spikes: neuron fired if v was reset this step
+        // (v == c indicates a just-reset state)
+        let iz_count = self.iz_neurons.iter()
+            .filter(|n| (n.v - n.c).abs() < 1e-3)
+            .count() as u8;
+        BearBullSignal { bear_count, bull_count, iz_count }
     }
 
     /// Apply STDP learning rule

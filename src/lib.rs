@@ -19,12 +19,13 @@
 //! use neuromod::{SpikingNetwork, NeuroModulators};
 //!
 //! let mut network = SpikingNetwork::new();
-//! let stimuli = [0.5, 0.3, 0.8, 0.2]; // Input channels
+//! let stimuli = [0.5f32; 16]; // 16-channel input
 //! let modulators = NeuroModulators::default();
-//! 
+//!
 //! // Step the network
 //! let spikes = network.step(&stimuli, &modulators);
-//! println!("Neurons that spiked: {:?}", spikes);
+//! let signal = network.bear_bull_signal();
+//! println!("Spikes: {:?}  Net sentiment: {}", spikes, signal.net());
 //! ```
 
 pub mod lif;
@@ -39,7 +40,7 @@ pub mod traits;
 pub use lif::LifNeuron;
 pub use izhikevich::IzhikevichNeuron;
 pub use modulators::NeuroModulators;
-pub use engine::SpikingNetwork;
+pub use engine::{SpikingNetwork, BearBullSignal};
 pub use mining::MiningReward;
 pub use traits::HftReward;
 
