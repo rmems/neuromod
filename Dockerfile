@@ -1,5 +1,7 @@
 # Multi-stage Docker for neuromod (library + examples/tests)
-# Builder — Rust 1.97.1 (bookworm) keeps glibc in sync with the debian:bookworm-slim runtime.
+# Builder — Rust 1.98.0 (bookworm) keeps glibc in sync with the debian:bookworm-slim runtime.
+# Toolchain pin (Cargo.toml/rust-toolchain.toml/CI) is 1.98.1; this stays at 1.98.0 until
+# the upstream `rust:1.98.1-slim-bookworm` image is published.
 FROM rust:1.98.0-slim-bookworm AS builder
 WORKDIR /app
 COPY . .

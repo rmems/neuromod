@@ -1,4 +1,4 @@
-FROM rust:1.97.1-slim-bookworm
+FROM rust:1.98.0-slim-bookworm
 
 # Add components used by CI, local review, and the dev container post-create step.
 RUN rustup component add rustfmt clippy llvm-tools-preview
